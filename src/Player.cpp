@@ -1,7 +1,8 @@
 #include "Player.h"
 #include <iostream>
 
-Player::Player(const std::string& textureFile, sf::Vector2f startPos) {
+Player::Player(const std::string& textureFile, const std::string& prefix, sf::Vector2f startPos)
+    : imagePrefix(prefix) {
     isOnGround = false;
 
     if (!texture.loadFromFile(textureFile)) {
@@ -9,12 +10,10 @@ Player::Player(const std::string& textureFile, sf::Vector2f startPos) {
     }
 
     sprite.setTexture(texture);
-
-    sprite.setScale(0.2f, 0.2f); // thu nhỏ xuống 20%, tuỳ chỉnh nếu cần
-
+    sprite.setScale(0.2f, 0.2f);
     sprite.setPosition(startPos);
     speed = 200.f;
-    hp = 100;
+    hp = 200;
     velocity = {0.f, 0.f};
 
     hpBarBack.setSize({50.f, 5.f});
@@ -24,17 +23,29 @@ Player::Player(const std::string& textureFile, sf::Vector2f startPos) {
     hpBarFront.setFillColor(sf::Color::Green);
 }
 
-void Player::handleInput(sf::Keyboard::Key left, sf::Keyboard::Key right, sf::Keyboard::Key jump) {
+void Player::handleInput(sf::Keyboard::Key left, sf::Keyboard::Key right, sf::Keyboard::Key jump,
+                         sf::Keyboard::Key punch, sf::Keyboard::Key kick, bool isPlayer1) {
     velocity.x = 0.f;
 
-    if (sf::Keyboard::isKeyPressed(left))
-        velocity.x = -speed;
-    else if (sf::Keyboard::isKeyPressed(right))
-        velocity.x = speed;
-
+    if (sf::Keyboard::isKeyPressed(left)) {
+    velocity.x = -speed;
+    setAction(ActionType::RunLeft);
+} else if (sf::Keyboard::isKeyPressed(right)) {
+    velocity.x = speed;
+    setAction(ActionType::RunRight);
+} else {
+    setAction(ActionType::Idle);  // khi không ấn gì
+}
     if (sf::Keyboard::isKeyPressed(jump) && isOnGround) {
         velocity.y = -300.f;
-        isOnGround = false; // tránh nhảy nhiều lần liên tiếp
+        isOnGround = false;
+        setAction(ActionType::Jump);
+    }
+
+    if (sf::Keyboard::isKeyPressed(punch)) {
+        setAction(ActionType::Punch);
+    } else if (sf::Keyboard::isKeyPressed(kick)) {
+        setAction(ActionType::Kick);
     }
 }
 
@@ -45,7 +56,6 @@ void Player::update(float deltaTime) {
     float groundY = 600.f;
     float spriteHeight = sprite.getGlobalBounds().height;
 
-    // Kiểm tra chạm đất
     if (sprite.getPosition().y + spriteHeight > groundY && velocity.y > 0) {
         sf::Vector2f pos = sprite.getPosition();
         pos.y = groundY - spriteHeight;
@@ -55,9 +65,10 @@ void Player::update(float deltaTime) {
     } else {
         isOnGround = false;
     }
+
     if (isHit && hitClock.getElapsedTime().asSeconds() > 0.2f) {
-    isHit = false;
-    sprite.setColor(sf::Color::White); // Trả lại màu ban đầu
+        isHit = false;
+        sprite.setColor(sf::Color::White);
     }
 
     if (isAttacking && actionClock.getElapsedTime().asSeconds() > 0.2f) {
@@ -65,20 +76,14 @@ void Player::update(float deltaTime) {
     }
 }
 
-
-
-
-
 void Player::render(sf::RenderWindow& window) {
     window.draw(sprite);
 
-    // Cập nhật vị trí và kích thước thanh máu theo sprite
     sf::Vector2f pos = sprite.getPosition();
     hpBarBack.setPosition(pos.x, pos.y - 10);
     hpBarFront.setPosition(pos.x, pos.y - 10);
 
-    hpBarFront.setSize({50.f * (hp / 100.f), 5.f});
-
+    hpBarFront.setSize({50.f * (hp / 200.f), 5.f});
     window.draw(hpBarBack);
     window.draw(hpBarFront);
 }
@@ -90,29 +95,53 @@ sf::FloatRect Player::getBounds() const {
 void Player::takeDamage(int amount) {
     hp -= amount;
     if (hp < 0) hp = 0;
+    setAction(ActionType::Hitten);
 }
 
 bool Player::isDead() const {
     return hp <= 0;
 }
+
 void Player::setHit() {
     isHit = true;
-    sprite.setColor(sf::Color::Red);  // Đổi màu thành đỏ
+    sprite.setColor(sf::Color::Red);
     hitClock.restart();
 }
 
 void Player::setAction(ActionType type) {
+    std::string path = "assets/images/" + imagePrefix;
+
     switch (type) {
         case ActionType::Idle:
-            texture.loadFromFile("assets/images/player_1.png");
+            texture.loadFromFile(path + ".png");
             isAttacking = false;
             break;
         case ActionType::Kick:
-            texture.loadFromFile("assets/images/player_1_kick.png");
+            texture.loadFromFile(path + "_kick.png");
             isAttacking = true;
             actionClock.restart();
             break;
+        case ActionType::Punch:
+            texture.loadFromFile(path + "_punch.png");
+            isAttacking = true;
+            actionClock.restart();
+            break;
+        case ActionType::Jump:
+            texture.loadFromFile(path + "_jump.png");
+            break;
+        case ActionType::RunLeft:
+            texture.loadFromFile(path + "_runleft.png");
+            break;
+        case ActionType::RunRight:
+            texture.loadFromFile(path + "_runright.png");
+            break;
+        case ActionType::Hitten:
+            texture.loadFromFile(path + "_hitten.png");
+            isAttacking = true; // Coi như cũng đang "animation" tạm thời
+            actionClock.restart();
+            break;
     }
+
     sprite.setTexture(texture);
 }
 
