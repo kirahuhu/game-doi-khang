@@ -49,7 +49,7 @@ void Player::handleInput(sf::Keyboard::Key left, sf::Keyboard::Key right, sf::Ke
     }
 }
 
-void Player::update(float deltaTime) {
+/*void Player::update(float deltaTime) {
     velocity.y += 500.f * deltaTime;
     sprite.move(velocity * deltaTime);
 
@@ -74,8 +74,53 @@ void Player::update(float deltaTime) {
     if (isAttacking && actionClock.getElapsedTime().asSeconds() > 0.2f) {
         setAction(ActionType::Idle);
     }
-}
+}*/
 
+void Player::update(float deltaTime) { // ham update moi
+    velocity.y += 500.f * deltaTime;
+
+    /*if (velocity.x != 0.f && currentAction != ActionType::RunLeft && currentAction != ActionType::RunRight) {
+        velocity.x *= 0.9f; // Giảm vận tốc ngang dần (ma sát)
+        if (std::abs(velocity.x) < 0.1f) velocity.x = 0.f; // Ngừng hẳn khi vận tốc nhỏ
+    }*/
+
+    sprite.move(velocity * deltaTime);
+
+    float groundY = 600.f;
+    float spriteHeight = sprite.getGlobalBounds().height;
+
+    // Giới hạn vị trí x trong màn hình (0 <= x <= 800 - spriteWidth)
+    float spriteWidth = sprite.getGlobalBounds().width;
+    sf::Vector2f pos = sprite.getPosition();
+    if (pos.x < 0) {
+        pos.x = 0;
+        velocity.x = 0.f;
+    } else if (pos.x + spriteWidth > 800) {
+        pos.x = 800 - spriteWidth;
+        velocity.x = 0.f;
+    }
+
+    // Kiểm tra mặt đất
+    if (pos.y + spriteHeight > groundY && velocity.y > 0) {
+        pos.y = groundY - spriteHeight;
+        sprite.setPosition(pos);
+        velocity.y = 0.f;
+        isOnGround = true;
+    } else {
+        isOnGround = false;
+    }
+
+    sprite.setPosition(pos);
+
+    if (isHit && hitClock.getElapsedTime().asSeconds() > 0.2f) {
+        isHit = false;
+        sprite.setColor(sf::Color::White);
+    }
+
+    if (isAttacking && actionClock.getElapsedTime().asSeconds() > 0.8f) {
+        setAction(ActionType::Idle);
+    }
+}
 
 void Player::render(sf::RenderWindow& window) {
     window.draw(sprite);
@@ -109,13 +154,43 @@ void Player::setHit() {
     hitClock.restart();
 }
 
+sf::Clock& Player::getDamageCooldown() {
+    return damageCooldown;
+} // code moi them
+
+sf::Vector2f Player::getVelocity() const {
+    return velocity;
+}
+
+int Player::getHealth() const {
+    return hp;
+}
+
+
+sf::Sprite& Player::getSprite() { // Định nghĩa hàm getSprite
+    return sprite;
+}
+
+bool Player::isCurrentlyAttacking() const {
+    return isAttacking;
+}
+
+Player::ActionType Player::getCurrentAction() const { // Thêm để bot phân tích hành động player1
+    return currentAction;
+}
+
+sf::Clock& Player::getAttackClock() {
+    return attackClock;
+}
+
+
 void Player::setAction(ActionType type) {
     std::string path = "assets/images/" + imagePrefix;
 
     switch (type) {
         case ActionType::Idle:
             texture.loadFromFile(path + ".png");
-            //velocity.x = 0.f;
+            velocity.x = 0.f;// code moi
             isAttacking = false;
             break;
         case ActionType::Kick:
@@ -133,19 +208,18 @@ void Player::setAction(ActionType type) {
             break;
         case ActionType::RunLeft:
             texture.loadFromFile(path + "_runleft.png");
-            //velocity.x = -speed;
+            velocity.x = -speed;
             break;
         case ActionType::RunRight:
             texture.loadFromFile(path + "_runright.png");
-            //velocity.x = speed;
+            velocity.x = speed;
             break;
         case ActionType::Hitten:
             texture.loadFromFile(path + "_hitten.png");
-            isAttacking = true; // Coi như cũng đang "animation" tạm thời
+            isAttacking = false; // Coi như cũng đang "animation" tạm thời
             actionClock.restart();
             break;
     }
 
     sprite.setTexture(texture);
 }
-
