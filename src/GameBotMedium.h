@@ -2,7 +2,9 @@
 #define MEDIUMMODE_H
 
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include "Player.h"
+
 
 class MediumMode {
 public:
@@ -20,6 +22,8 @@ private:
     sf::RectangleShape botHealthBar;
     sf::Font font;
     sf::Text vsText;
+    sf::Music bgMusic;
+    sf::Text exitText;
     sf::Text gameOverText; // Thêm để hiển thị kết quả
     bool gameEnded; // Thêm để theo dõi trạng thái game
     sf::Clock clock; // Thêm để tính deltaTime động

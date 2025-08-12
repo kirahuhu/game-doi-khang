@@ -62,8 +62,7 @@ int main() {
                             window.display();
                         }
                     } else if (choice == 1) {
-                        window.close();
-                        runGamePVP(); // chơi 2 người
+                        runGamePVP(window); // chơi 2 người
                     } else if (choice == 2) {
                         window.close(); // thoát
                     }

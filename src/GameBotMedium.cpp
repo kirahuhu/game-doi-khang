@@ -6,6 +6,16 @@
 
 MediumMode::MediumMode(sf::RenderWindow& window) : window(window), player("assets/images/player_1.png", "player_1", sf::Vector2f(100, 400)), bot("assets/images/mediumbot2.png", "mediumbot2", sf::Vector2f(500, 320)) {
    window.setFramerateLimit(60); // Giới hạn FPS để đồng bộ
+
+   // 🎵 Load nhạc nền
+    if (!bgMusic.openFromFile("assets/sounds/mediumMode.ogg")) {
+        std::cerr << "Không thể tải nhạc nền hardmode.ogg\n";
+    } else {
+        bgMusic.setLoop(true);  // lặp vô hạn
+        bgMusic.setVolume(50);  // âm lượng 0-100
+        bgMusic.play();
+    }
+
     // Load background texture
     if (!backgroundTexture.loadFromFile("assets/images/mediumbg.jpg")) {
         background.setSize(sf::Vector2f(800, 600));
@@ -57,7 +67,15 @@ void MediumMode::runGameWithBot_Medium() {
         float deltaTime = clock.restart().asSeconds(); // Sử dụng deltaTime động
         sf::Event event;
         while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) window.close();
+           if (event.type == sf::Event::Closed) window.close();
+            // Thoát về menu khi nhấn O
+            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::O) {
+                return; // Kết thúc hàm để thoát về menu
+            }
+            if (!gameEnded) {
+                player.handleInput(sf::Keyboard::A, sf::Keyboard::D, sf::Keyboard::W,
+                                   sf::Keyboard::J, sf::Keyboard::K, true);
+            }
             if (!gameEnded) {
                 player.handleInput(sf::Keyboard::A, sf::Keyboard::D, sf::Keyboard::W, sf::Keyboard::J, sf::Keyboard::K, true);
             }
@@ -92,6 +110,12 @@ void MediumMode::runGameWithBot_Medium() {
                 gameEnded = true;
             }
         }
+
+        exitText.setFont(font);
+        exitText.setString("EXIT: O");
+        exitText.setCharacterSize(20);
+        exitText.setFillColor(sf::Color::White);
+        exitText.setPosition(10, 570); // góc dưới bên trái
 
         window.clear();
         window.draw(background);

@@ -10,6 +10,15 @@ HardMode::HardMode(sf::RenderWindow& window)
 {
     window.setFramerateLimit(60);
 
+     // 🎵 Load nhạc nền
+    if (!bgMusic.openFromFile("assets/sounds/hardmode.ogg")) {
+        std::cerr << "Không thể tải nhạc nền hardmode.ogg\n";
+    } else {
+        bgMusic.setLoop(true);  // lặp vô hạn
+        bgMusic.setVolume(50);  // âm lượng 0-100
+        bgMusic.play();
+    }
+
     if (!backgroundTexture.loadFromFile("assets/images/hardbg.jpg")) {
         background.setSize(sf::Vector2f(800, 600));
         background.setFillColor(sf::Color(50, 50, 50));
@@ -52,6 +61,10 @@ void HardMode::runGameWithBot_Hard() {
         sf::Event event;
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) window.close();
+            // Thoát về menu khi nhấn O
+            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::O) {
+                return; // Kết thúc hàm để thoát về menu
+            }
             if (!gameEnded) {
                 player.handleInput(sf::Keyboard::A, sf::Keyboard::D, sf::Keyboard::W,
                                    sf::Keyboard::J, sf::Keyboard::K, true);
@@ -90,6 +103,11 @@ void HardMode::runGameWithBot_Hard() {
                 gameEnded = true;
             }
         }
+        exitText.setFont(font);
+        exitText.setString("EXIT: O");
+        exitText.setCharacterSize(20);
+        exitText.setFillColor(sf::Color::White);
+        exitText.setPosition(10, 570); // góc dưới bên trái
 
         window.clear();
         window.draw(background);
@@ -99,6 +117,7 @@ void HardMode::runGameWithBot_Hard() {
         player.render(window);
         bot.render(window);
         if (gameEnded) window.draw(gameOverText);
+        window.draw(exitText);
         window.display();
     }
 }

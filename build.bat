@@ -1,24 +1,18 @@
 @echo off
 setlocal enabledelayedexpansion
 
-REM 
-set ROOT=%~dp0
-
-REM 
-set MINGW=%ROOT%mingw64
-
-REM 
+set MINGW=mingw64
 set SRC=
-for %%f in ("%ROOT%src\*.cpp") do (
-    set SRC=!SRC! "%%f"
+
+for %%f in (src\*.cpp) do (
+    set SRC=!SRC! %%f
 )
 
-REM 
-"%MINGW%\bin\g++.exe" !SRC! ^
--I"%ROOT%include" ^
--L"%ROOT%lib" ^
--lsfml-graphics -lsfml-window -lsfml-system ^
+%MINGW%\bin\g++.exe !SRC! ^
+-Iinclude ^
+-Llib ^
+-lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio ^
 -static-libgcc -static-libstdc++ ^
--o "%ROOT%USFighters.exe"
+-o USFighters.exe
 
 pause

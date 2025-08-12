@@ -1,2 +1,4 @@
 #pragma once
-void runGamePVP();
+#include <SFML/Graphics.hpp>
+
+void runGamePVP(sf::RenderWindow& window);

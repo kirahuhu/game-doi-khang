@@ -2,8 +2,7 @@
 #include "Player.h"
 #include <iostream>
 
-void runGamePVP() {
-    sf::RenderWindow window(sf::VideoMode(800, 600), "2 Player Fighting Game");
+void runGamePVP(sf::RenderWindow& window) {
     window.setFramerateLimit(60);
 
     sf::Font font;
@@ -16,6 +15,14 @@ void runGamePVP() {
     gameOverText.setCharacterSize(40);
     gameOverText.setFillColor(sf::Color::Red);
     gameOverText.setPosition(200.f, 200.f);
+
+    sf::Text exitText;
+    exitText.setFont(font);
+    exitText.setCharacterSize(20);
+    exitText.setFillColor(sf::Color::Yellow);
+    exitText.setString("EXIT: O");
+    exitText.setPosition(10.f, 10.f);
+
     bool gameEnded = false;
 
     sf::Texture bgTexture;
@@ -36,8 +43,14 @@ void runGamePVP() {
         sf::Event event;
 
         while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
+            if (event.type == sf::Event::Closed) {
                 window.close();
+            }
+            if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::O) {
+                    return; // Chỉ thoát về menu, không đóng cửa sổ
+                }
+            }
         }
 
         if (!gameEnded) {
@@ -52,13 +65,7 @@ void runGamePVP() {
 
             bool isColliding = player1.getBounds().intersects(player2.getBounds());
 
-            if (isColliding && sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
-                if (attackClock1.getElapsedTime().asSeconds() > 0.5f) {
-                    player2.takeDamage(10);
-                    player2.setHit();
-                    attackClock1.restart();
-                }
-            } else if (isColliding && sf::Keyboard::isKeyPressed(sf::Keyboard::E)) {
+            if (isColliding && (sf::Keyboard::isKeyPressed(sf::Keyboard::Q) || sf::Keyboard::isKeyPressed(sf::Keyboard::E))) {
                 if (attackClock1.getElapsedTime().asSeconds() > 0.5f) {
                     player2.takeDamage(10);
                     player2.setHit();
@@ -66,13 +73,7 @@ void runGamePVP() {
                 }
             }
 
-            if (isColliding && sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)) {
-                if (attackClock2.getElapsedTime().asSeconds() > 0.5f) {
-                    player1.takeDamage(10);
-                    player1.setHit();
-                    attackClock2.restart();
-                }
-            } else if (isColliding && sf::Keyboard::isKeyPressed(sf::Keyboard::RShift)) {
+            if (isColliding && (sf::Keyboard::isKeyPressed(sf::Keyboard::RControl) || sf::Keyboard::isKeyPressed(sf::Keyboard::RShift))) {
                 if (attackClock2.getElapsedTime().asSeconds() > 0.5f) {
                     player1.takeDamage(10);
                     player1.setHit();
@@ -93,6 +94,7 @@ void runGamePVP() {
         window.draw(bgSprite);
         player1.render(window);
         player2.render(window);
+        window.draw(exitText);
         if (gameEnded) window.draw(gameOverText);
         window.display();
     }
