@@ -185,6 +185,7 @@ sf::Clock& Player::getAttackClock() {
 
 
 void Player::setAction(ActionType type) {
+    currentAction = type;
     std::string path = "assets/images/" + imagePrefix;
 
     switch (type) {
@@ -195,11 +196,13 @@ void Player::setAction(ActionType type) {
             break;
         case ActionType::Kick:
             texture.loadFromFile(path + "_kick.png");
+            velocity.x = 0.f; // Ngung di chuyen khi da
             isAttacking = true;
             actionClock.restart();
             break;
         case ActionType::Punch:
             texture.loadFromFile(path + "_punch.png");
+            velocity.x = 0.f; // Ngung di chuyen khi danh
             isAttacking = true;
             actionClock.restart();
             break;
@@ -216,8 +219,10 @@ void Player::setAction(ActionType type) {
             break;
         case ActionType::Hitten:
             texture.loadFromFile(path + "_hitten.png");
+            velocity.x = 0.f; // Ngung di chuyen khi bi danh
             isAttacking = false; // Coi như cũng đang "animation" tạm thời
-            actionClock.restart();
+            isHit = true;
+            hitClock.restart();
             break;
     }
 

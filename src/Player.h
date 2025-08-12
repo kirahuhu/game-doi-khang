@@ -10,6 +10,7 @@ public:
     enum class ActionType { Idle, Kick, Punch, Jump, RunLeft, RunRight, Hitten };
 
 
+
 private:
     sf::Sprite sprite;
     sf::Texture texture;

@@ -34,6 +34,22 @@ MediumMode::MediumMode(sf::RenderWindow& window) : window(window), player("asset
     vsText.setCharacterSize(40);
     vsText.setFillColor(sf::Color::White);
     vsText.setPosition(375, 30);
+
+    gameOverText.setFont(font);
+    gameOverText.setCharacterSize(50);
+    gameOverText.setFillColor(sf::Color::Black);
+    gameOverText.setPosition(200,300);
+
+    playerHealthBar.setSize(sf::Vector2f(1000, 20));
+    playerHealthBar.setFillColor(sf::Color::Red);
+    playerHealthBar.setPosition(50,50);
+
+    botHealthBar.setSize(sf::Vector2f(300,60));
+    botHealthBar.setFillColor(sf::Color::Red);
+    botHealthBar.setPosition(550, 50);
+
+    gameEnded = false;
+    
 }
 
 void MediumMode::runGameWithBot_Medium() {
@@ -57,14 +73,12 @@ void MediumMode::runGameWithBot_Medium() {
                 bot.takeDamage(10);
                 bot.setHit();
                 player.getAttackClock().restart();
-                std::cout << "Player tấn công Bot: HP Bot = " << bot.getHealth() << std::endl;
             }
 
             if (isColliding && bot.isCurrentlyAttacking() && bot.getAttackClock().getElapsedTime().asSeconds() > 0.5f) {
                 player.takeDamage(10);
                 player.setHit();
                 bot.getAttackClock().restart();
-                std::cout << "Bot tấn công Player: HP Player = " << player.getHealth() << std::endl;
             }
 
             playerHealthBar.setSize(sf::Vector2f(player.getHealth(), 20));
@@ -79,37 +93,6 @@ void MediumMode::runGameWithBot_Medium() {
             }
         }
 
-
-        // AI cho bot ở chế độ medium
-        //aiControlBot();
-
-        // Va chạm và sát thương
-        /*if (player.getBounds().intersects(bot.getBounds())) {
-            player.takeDamage(10);
-            bot.takeDamage(10);
-            player.setHit();
-            bot.setHit();
-        }*/
-
-         /*if (player.getBounds().intersects(bot.getBounds()) && player.getDamageCooldown().getElapsedTime().asSeconds() > 0.5f) {
-            player.takeDamage(5); // Giảm sát thương từ 10 xuống 5
-            bot.takeDamage(5);
-            player.setHit();
-            bot.setHit();
-            player.getDamageCooldown().restart();
-            bot.getDamageCooldown().restart();
-            std::cout << "Collision: Player1 HP = " << player.getHealth() << ", Bot HP = " << bot.getHealth() << std::endl;
-        }*/
-
-        /*if (player.getDamageCooldown().getElapsedTime().asSeconds() > 0.5f) {
-                player.takeDamage(5);
-                bot.takeDamage(5);
-                player.setHit();
-                bot.setHit();
-                player.getDamageCooldown().restart();
-                bot.getDamageCooldown().restart();
-                std::cout << "Collision: Player1 HP = " << player.getHealth() << ", Bot HP = " << bot.getHealth() << std::endl;
-            }*/
         window.clear();
         window.draw(background);
         window.draw(playerHealthBar);
@@ -134,7 +117,27 @@ void MediumMode::aiControlBot(float deltaTime) {
     float distanceX = playerBounds.left - botBounds.left;
     bool botOnGround = bot.getVelocity().y == 0 && bot.getSprite().getPosition().y + bot.getSprite().getGlobalBounds().height >= 600;
 
+    if (bot.getCurrentAction() == Player::ActionType::Hitten && bot.getDamageCooldown().getElapsedTime().asSeconds() < 0.5f) {
+        return; // Giữ trạng thái bị đánh trong 0.5 giây
+    }
+
+    // Kiểm tra nếu bot đang tấn công
+    if ((bot.getCurrentAction() == Player::ActionType::Punch || bot.getCurrentAction() == Player::ActionType::Kick) && 
+        bot.getAttackClock().getElapsedTime().asSeconds() < 0.5f) {
+        return; // Giữ trạng thái tấn công trong 0.5 giây để animation mượt
+    }
+
+    //code them moi
+    float botSpeedFactor = 0.0000001;
     int actionChance = rand() % 100;
+
+     // Kiểm tra va chạm để set trạng thái bị đánh
+    if ((player.getCurrentAction() == Player::ActionType::Punch || player.getCurrentAction() == Player::ActionType::Kick) && 
+        playerBounds.intersects(botBounds)) {
+        bot.setAction(Player::ActionType::Hitten);
+        bot.getDamageCooldown().restart(); // Reset timer khi bị đánh
+        return; // Thoát để ưu tiên trạng thái bị đánh
+    }
 
     // Nếu khoảng cách lớn, ưu tiên di chuyển đến gần player
     if (abs(distanceX) > 150) {
@@ -146,7 +149,7 @@ void MediumMode::aiControlBot(float deltaTime) {
     }
     // Nếu khoảng cách trung bình, kết hợp di chuyển và tấn công
     else if (abs(distanceX) > 50) {
-        if (actionChance < 20 && bot.getAttackClock().getElapsedTime().asSeconds() > 0.5f) {
+        if (actionChance < 15 && bot.getAttackClock().getElapsedTime().asSeconds() > 1.5f) {
             bot.setAction(rand() % 2 == 0 ? Player::ActionType::Punch : Player::ActionType::Kick);
         } else if (actionChance < 40 && botOnGround) {
             bot.setAction(Player::ActionType::Jump);
@@ -160,7 +163,7 @@ void MediumMode::aiControlBot(float deltaTime) {
     }
     // Nếu gần player, ưu tiên tấn công
     else {
-        if (actionChance < 60 && bot.getAttackClock().getElapsedTime().asSeconds() > 0.5f) {
+        if (actionChance < 50 && bot.getAttackClock().getElapsedTime().asSeconds() > 1.5f) {
             bot.setAction(rand() % 2 == 0 ? Player::ActionType::Punch : Player::ActionType::Kick);
         } else if (actionChance < 80 && botOnGround) {
             bot.setAction(Player::ActionType::Jump);
