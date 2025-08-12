@@ -52,6 +52,10 @@ void HardMode::runGameWithBot_Hard() {
         sf::Event event;
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) window.close();
+            // Thoát về menu khi nhấn O
+            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::O) {
+                return; // Kết thúc hàm để thoát về menu
+            }
             if (!gameEnded) {
                 player.handleInput(sf::Keyboard::A, sf::Keyboard::D, sf::Keyboard::W,
                                    sf::Keyboard::J, sf::Keyboard::K, true);
@@ -90,6 +94,11 @@ void HardMode::runGameWithBot_Hard() {
                 gameEnded = true;
             }
         }
+        exitText.setFont(font);
+        exitText.setString("EXIT: O");
+        exitText.setCharacterSize(20);
+        exitText.setFillColor(sf::Color::White);
+        exitText.setPosition(10, 570); // góc dưới bên trái
 
         window.clear();
         window.draw(background);
@@ -99,6 +108,7 @@ void HardMode::runGameWithBot_Hard() {
         player.render(window);
         bot.render(window);
         if (gameEnded) window.draw(gameOverText);
+        window.draw(exitText);
         window.display();
     }
 }

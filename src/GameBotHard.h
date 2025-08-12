@@ -23,6 +23,8 @@ private:
     sf::Text gameOverText;
     bool gameEnded;
     sf::Clock clock;
+    sf::Text exitText;
+
 
     void aiControlBot(float deltaTime);
 };
