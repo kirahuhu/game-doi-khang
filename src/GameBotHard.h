@@ -2,6 +2,7 @@
 #define HARDMODE_H
 
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include "Player.h"
 
 class HardMode {
@@ -24,6 +25,7 @@ private:
     bool gameEnded;
     sf::Clock clock;
     sf::Text exitText;
+    sf::Music bgMusic;
 
 
     void aiControlBot(float deltaTime);

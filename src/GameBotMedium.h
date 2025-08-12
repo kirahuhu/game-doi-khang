@@ -4,6 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include "Player.h"
 
+
 class MediumMode {
 public:
     MediumMode();

@@ -11,7 +11,7 @@ for %%f in (src\*.cpp) do (
 %MINGW%\bin\g++.exe !SRC! ^
 -Iinclude ^
 -Llib ^
--lsfml-graphics -lsfml-window -lsfml-system ^
+-lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio ^
 -static-libgcc -static-libstdc++ ^
 -o USFighters.exe
 

@@ -10,6 +10,15 @@ HardMode::HardMode(sf::RenderWindow& window)
 {
     window.setFramerateLimit(60);
 
+     // 🎵 Load nhạc nền
+    if (!bgMusic.openFromFile("assets/sounds/hardmode.ogg")) {
+        std::cerr << "Không thể tải nhạc nền hardmode.ogg\n";
+    } else {
+        bgMusic.setLoop(true);  // lặp vô hạn
+        bgMusic.setVolume(50);  // âm lượng 0-100
+        bgMusic.play();
+    }
+
     if (!backgroundTexture.loadFromFile("assets/images/hardbg.jpg")) {
         background.setSize(sf::Vector2f(800, 600));
         background.setFillColor(sf::Color(50, 50, 50));
