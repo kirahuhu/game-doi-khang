@@ -49,8 +49,10 @@ int main() {
                                             mediumMode.runGameWithBot_Medium();
                                         }
                                         else if (difficulty == 2){
-                                           //Hoang runGameWithBot_Hard();
+                                            HardMode hardMode(window);
+                                            hardMode.runGameWithBot_Hard();
                                         }
+
                                     }
                                 }
                             }
