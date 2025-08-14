@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include "Player.h"
 #include <iostream>
 
@@ -9,6 +10,17 @@ void runGamePVP(sf::RenderWindow& window) {
     if (!font.loadFromFile("assets/fonts/arial.ttf")) {
         std::cerr << "Không thể tải font!\n";
     }
+
+    sf::RectangleShape player1HealthBar;
+    sf::RectangleShape player2HealthBar;
+
+    player1HealthBar.setSize(sf::Vector2f(1000, 20));
+    player1HealthBar.setFillColor(sf::Color::Red);
+    player1HealthBar.setPosition(50, 50);
+
+    player2HealthBar.setSize(sf::Vector2f(200, 20));
+    player2HealthBar.setFillColor(sf::Color::Red);
+    player2HealthBar.setPosition(550, 50);
 
     sf::Text gameOverText;
     gameOverText.setFont(font);
@@ -22,6 +34,15 @@ void runGamePVP(sf::RenderWindow& window) {
     exitText.setFillColor(sf::Color::Yellow);
     exitText.setString("EXIT: O");
     exitText.setPosition(10.f, 10.f);
+
+    sf::Music bgMusic;
+    if (!bgMusic.openFromFile("assets/sounds/pvp.ogg")) {
+        std::cerr << "Không thể tải nhạc nền pvp.ogg\n";
+    } else {
+        bgMusic.setLoop(true);  // lặp vô hạn
+        bgMusic.setVolume(50);  // âm lượng 0-100
+        bgMusic.play();
+    }
 
     bool gameEnded = false;
 
@@ -81,6 +102,9 @@ void runGamePVP(sf::RenderWindow& window) {
                 }
             }
 
+            player1HealthBar.setSize(sf::Vector2f(player1.getHealth(), 20));
+            player2HealthBar.setSize(sf::Vector2f(player2.getHealth(), 20));
+
             if (player1.isDead()) {
                 gameOverText.setString("Player 2 Wins");
                 gameEnded = true;
@@ -94,6 +118,8 @@ void runGamePVP(sf::RenderWindow& window) {
         window.draw(bgSprite);
         player1.render(window);
         player2.render(window);
+        window.draw(player1HealthBar);
+        window.draw(player2HealthBar);
         window.draw(exitText);
         if (gameEnded) window.draw(gameOverText);
         window.display();
