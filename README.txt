@@ -1,0 +1,1 @@
+Dạ tụi em chào thầy, thầy sau khi tải file zip về thì double click file build(tạo file exe mới) là có thể chạy được rồi ạ
