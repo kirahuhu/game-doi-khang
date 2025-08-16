@@ -42,7 +42,8 @@ int main() {
                                        // window.close(); // đóng cửa sổ menu
 
                                         if (difficulty == 0){
-                                           //An runGameWithBot_Easy();
+                                           EasyMode easyMode(window);
+                                        	easyMode.runGameWithBot_Easy();
                                         }
                                         else if (difficulty == 1){
                                             MediumMode mediumMode(window);
