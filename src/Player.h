@@ -59,6 +59,8 @@ public:
 	void attack();  // Phương thức tấn công
     void jump();    // Phương thức nhảy
     void setImagePrefix(const std::string& prefix);
+    bool getIsHit() const { return isHit; } 
+    bool getIsAttacking() const { return isAttacking; }
 };
 
 #endif

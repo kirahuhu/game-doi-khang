@@ -21,6 +21,9 @@ void MediumMode::render() {
 
 
 void MediumMode::aiControlBot(float dt) {
+    if (bot.getIsHit() || bot.getIsAttacking()) {
+        return; // Thoát hàm, chờ trạng thái bị đánh kết thúc
+    }
     sf::FloatRect playerBounds = player.getBounds();
     sf::FloatRect botBounds = bot.getBounds();
     float distanceX = playerBounds.left - botBounds.left;
@@ -38,11 +41,11 @@ void MediumMode::aiControlBot(float dt) {
     else if (abs(distanceX) > 50) {
         int actionChance = rand() % 100;
 
-        // Kiểm tra nếu bot có cơ hội tấn công (20%)
-        if (actionChance < 15 && bot.getAttackClock().getElapsedTime().asSeconds() > 1.5f) {
+        // Kiểm tra nếu bot có cơ hội tấn công (25%)
+        if (actionChance < 30 && bot.getAttackClock().getElapsedTime().asSeconds() > 1.0f) {
             bot.setAction(rand() % 2 == 0 ? Player::ActionType::Punch : Player::ActionType::Kick);
         }
-        // Nếu bot ở trên mặt đất và có cơ hội nhảy (40%)
+        // Nếu bot ở trên mặt đất và có cơ hội nhảy (20%)
         else if (actionChance < 40 && botOnGround) {
             bot.setAction(Player::ActionType::Jump);
         }
