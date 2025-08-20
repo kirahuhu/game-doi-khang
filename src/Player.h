@@ -30,7 +30,6 @@ private:
     float speed;
     int hp;
     bool isOnGround;
-
     sf::Clock damageCooldown; //code moi them
     ActionType currentAction;
 
@@ -56,7 +55,9 @@ public:
     sf::Sprite& getSprite();
     bool isCurrentlyAttacking() const; // Kiểm tra xem nhân vật có đang tấn công không
     ActionType getCurrentAction() const;
-
+	sf::Vector2f getPosition() const;
+	void attack();  // Phương thức tấn công
+    void jump();    // Phương thức nhảy
 };
 
 #endif

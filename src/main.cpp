@@ -1,78 +1,97 @@
+// main.cpp
 #include <SFML/Graphics.hpp>
 #include "Menu.h"
 #include "DifficultyMenu.h"
-#include "GamePVP.h"
 #include "GameBotEasy.h"
 #include "GameBotMedium.h"
 #include "GameBotHard.h"
+#include "GamePVP.h"
+
+void runGamePVP(sf::RenderWindow& window) {
+    PVPMode game(window); // Khởi tạo PVPMode
+    game.runGame();       // Gọi phương thức runGame của PVPMode
+}
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(800, 600), "US FIGHTERS");
-    Menu menu(800, 600);
+
+    Menu mainMenu(800, 600);
 
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 window.close();
-
-            if (event.type == sf::Event::KeyPressed) {
+            else if (event.type == sf::Event::KeyPressed) {
+                // Điều hướng menu chính
                 if (event.key.code == sf::Keyboard::Up)
-                    menu.moveUp();
+                    mainMenu.moveUp();
                 else if (event.key.code == sf::Keyboard::Down)
-                    menu.moveDown();
+                    mainMenu.moveDown();
                 else if (event.key.code == sf::Keyboard::Enter) {
-                    int choice = menu.getSelectedIndex();
-                    if (choice == 0) {
-                        // Hiện menu chọn độ khó
-                        DifficultyMenu diffMenu(800, 600);
-                        bool choosing = true;
-                        while (choosing && window.isOpen()) {
-                            while (window.pollEvent(event)) {
-                                if (event.type == sf::Event::Closed)
-                                    window.close();
-                                else if (event.type == sf::Event::KeyPressed) {
-                                    if (event.key.code == sf::Keyboard::Up)
-                                        diffMenu.moveUp();
-                                    else if (event.key.code == sf::Keyboard::Down)
-                                        diffMenu.moveDown();
-                                    else if (event.key.code == sf::Keyboard::Enter) {
-                                        int difficulty = static_cast<int>(diffMenu.getDifficulty()); // 0 = Easy, 1 = Medium, 2 = Hard
-                                        choosing = false;
-                                       // window.close(); // đóng cửa sổ menu
+                    int choice = mainMenu.getSelectedIndex();
 
-                                        if (difficulty == 0){
-                                           EasyMode easyMode(window);
-                                        	easyMode.runGameWithBot_Easy();
-                                        }
-                                        else if (difficulty == 1){
-                                            MediumMode mediumMode(window);
-                                            mediumMode.runGameWithBot_Medium();
-                                        }
-                                        else if (difficulty == 2){
-                                            HardMode hardMode(window);
-                                            hardMode.runGameWithBot_Hard();
-                                        }
+                    switch (choice) {
+                        case 0: { // Chơi với bot → mở menu chọn difficulty
+                            DifficultyMenu diffMenu(800, 600);
+                            bool choosing = true;
 
+                            while (choosing && window.isOpen()) {
+                                sf::Event diffEvent;
+                                while (window.pollEvent(diffEvent)) {
+                                    if (diffEvent.type == sf::Event::Closed) {
+                                        window.close();
+                                    } else if (diffEvent.type == sf::Event::KeyPressed) {
+                                        if (diffEvent.key.code == sf::Keyboard::Up)
+                                            diffMenu.moveUp();
+                                        else if (diffEvent.key.code == sf::Keyboard::Down)
+                                            diffMenu.moveDown();
+                                        else if (diffEvent.key.code == sf::Keyboard::Enter) {
+                                            choosing = false;
+                                            // Chạy mode tương ứng
+                                            switch (diffMenu.getDifficulty()) {
+                                                case BotDifficulty::Easy: {
+                                                    EasyMode easyMode(window);
+                                                    easyMode.runGame();
+                                                    break;
+                                                }
+                                                case BotDifficulty::Medium: {
+                                                    MediumMode mediumMode(window);
+                                                    mediumMode.runGame();
+                                                    break;
+                                                }
+                                                case BotDifficulty::Hard: {
+                                                    HardMode hardMode(window);
+                                                    hardMode.runGame();
+                                                    break;
+                                                }
+                                            }
+                                        }
                                     }
                                 }
+                                window.clear();
+                                diffMenu.draw(window);
+                                window.display();
                             }
-
-                            window.clear();
-                            diffMenu.draw(window);
-                            window.display();
+                            break;
                         }
-                    } else if (choice == 1) {
-                        runGamePVP(window); // chơi 2 người
-                    } else if (choice == 2) {
-                        window.close(); // thoát
+
+                        case 1: { // PVP mode
+                            runGamePVP(window);
+                            break;
+                        }
+
+                        case 2: { // Exit
+                            window.close();
+                            break;
+                        }
                     }
                 }
             }
         }
 
         window.clear();
-        menu.draw(window);
+        mainMenu.draw(window);
         window.display();
     }
 

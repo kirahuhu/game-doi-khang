@@ -15,7 +15,7 @@ Player::Player(const std::string& textureFile, const std::string& prefix, sf::Ve
     speed = 200.f;
     hp = 200;
     velocity = {0.f, 0.f};
-
+	currentAction = ActionType::Idle; 
     hpBarBack.setSize({50.f, 5.f});
     hpBarBack.setFillColor(sf::Color::Black);
 
@@ -76,51 +76,44 @@ void Player::handleInput(sf::Keyboard::Key left, sf::Keyboard::Key right, sf::Ke
     }
 }*/
 
-void Player::update(float deltaTime) { // ham update moi
+void Player::update(float deltaTime) {
+    // Áp dụng trọng lực
     velocity.y += 500.f * deltaTime;
-
-    /*if (velocity.x != 0.f && currentAction != ActionType::RunLeft && currentAction != ActionType::RunRight) {
-        velocity.x *= 0.9f; // Giảm vận tốc ngang dần (ma sát)
-        if (std::abs(velocity.x) < 0.1f) velocity.x = 0.f; // Ngừng hẳn khi vận tốc nhỏ
-    }*/
-
     sprite.move(velocity * deltaTime);
 
-    float groundY = 600.f;
-    float spriteHeight = sprite.getGlobalBounds().height;
-
-    // Giới hạn vị trí x trong màn hình (0 <= x <= 800 - spriteWidth)
+    // Giới hạn không cho đi ra khỏi màn hình (X)
     float spriteWidth = sprite.getGlobalBounds().width;
-    sf::Vector2f pos = sprite.getPosition();
-    if (pos.x < 0) {
-        pos.x = 0;
-        velocity.x = 0.f;
-    } else if (pos.x + spriteWidth > 800) {
-        pos.x = 800 - spriteWidth;
-        velocity.x = 0.f;
+    if (sprite.getPosition().x < 0) {
+        sprite.setPosition(0, sprite.getPosition().y);
+    }
+    if (sprite.getPosition().x > 800 - spriteWidth) {
+        sprite.setPosition(800 - spriteWidth, sprite.getPosition().y);
     }
 
-    // Kiểm tra mặt đất
-    if (pos.y + spriteHeight > groundY && velocity.y > 0) {
-        pos.y = groundY - spriteHeight;
-        sprite.setPosition(pos);
-        velocity.y = 0.f;
-        isOnGround = true;
-    } else {
+    // Giới hạn dưới (ground)
+    float groundY = 600.f;  
+	float spriteHeight = sprite.getGlobalBounds().height;  
+	if (sprite.getPosition().y + spriteHeight >= groundY) {
+	    sprite.setPosition(sprite.getPosition().x, groundY - spriteHeight);
+	    velocity.y = 0;
+	    isOnGround = true;
+	} else {
         isOnGround = false;
     }
 
-    sprite.setPosition(pos);
-
+    // Hết trạng thái bị đánh trúng sau 0.2s
     if (isHit && hitClock.getElapsedTime().asSeconds() > 0.2f) {
         isHit = false;
         sprite.setColor(sf::Color::White);
     }
 
-    if (isAttacking && actionClock.getElapsedTime().asSeconds() > 0.8f) {
+    // Hết trạng thái tấn công sau 0.2s (giữ đúng bản cũ)
+    if (isAttacking && actionClock.getElapsedTime().asSeconds() > 0.2f) {
+        isAttacking = false;
         setAction(ActionType::Idle);
     }
 }
+
 
 void Player::render(sf::RenderWindow& window) {
     window.draw(sprite);
@@ -139,9 +132,11 @@ sf::FloatRect Player::getBounds() const {
 }
 
 void Player::takeDamage(int amount) {
+	if (damageCooldown.getElapsedTime().asSeconds() < 0.5f) return; 
     hp -= amount;
     if (hp < 0) hp = 0;
     setAction(ActionType::Hitten);
+    damageCooldown.restart();  
 }
 
 bool Player::isDead() const {
@@ -166,6 +161,9 @@ int Player::getHealth() const {
     return hp;
 }
 
+sf::Vector2f Player::getPosition() const {
+    return sprite.getPosition();  // Trả về vị trí của sprite
+}
 
 sf::Sprite& Player::getSprite() { // Định nghĩa hàm getSprite
     return sprite;
@@ -199,12 +197,14 @@ void Player::setAction(ActionType type) {
             velocity.x = 0.f; // Ngung di chuyen khi da
             isAttacking = true;
             actionClock.restart();
+            attackClock.restart(); 
             break;
         case ActionType::Punch:
             texture.loadFromFile(path + "_punch.png");
             velocity.x = 0.f; // Ngung di chuyen khi danh
             isAttacking = true;
             actionClock.restart();
+            attackClock.restart(); 
             break;
         case ActionType::Jump:
             texture.loadFromFile(path + "_jump.png");
@@ -227,4 +227,21 @@ void Player::setAction(ActionType type) {
     }
 
     sprite.setTexture(texture);
+}
+void Player::attack() {
+    // Nếu chưa tấn công, thiết lập trạng thái tấn công
+    if (!isAttacking) {
+        isAttacking = true;
+        setAction(ActionType::Punch);  // hoặc Kick tùy vào loại tấn công
+        actionClock.restart();  // Thiết lập lại đồng hồ đếm thời gian
+    }
+}
+
+void Player::jump() {
+    // Nếu chưa nhảy và đang ở trên mặt đất
+    if (isOnGround) {
+        velocity.y = -300.f;  // Thiết lập vận tốc cho nhảy
+        isOnGround = false;
+        setAction(ActionType::Jump);  // Thiết lập hành động là nhảy
+    }
 }

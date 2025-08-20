@@ -1,31 +1,13 @@
+// GameBotEasy.h
 #pragma once
-#include <SFML/Graphics.hpp>
-#include <SFML/Audio.hpp>
-#include "Player.h"
+#include "BaseGameMode.h"
 
-class EasyMode {
+class EasyMode : public BaseGameMode {
 public:
-    EasyMode(sf::RenderWindow& win); // bắt buộc truyền window từ ngoài vào
-    void runGameWithBot_Easy();
+    EasyMode(sf::RenderWindow& win);  
 
-private:
-    void aiControlBot(float deltaTime);
-
-    sf::RenderWindow& gameWindow; // tham chiếu, không tạo mới
-    Player player;
-    Player bot;
-    sf::Clock clock;
-
-    sf::RectangleShape background;
-    sf::Texture backgroundTexture;
-    sf::Font font;
-    sf::Text vsText;
-    sf::Text gameOverText;
-    sf::Text exitText;    
+    void aiControlBot(float dt) override;
+    void update(float dt) override;        // Phương thức cập nhật game logic
+    void render() override;                // Phương thức vẽ lên màn hình
     
-    sf::Music bgMusic;
-    
-    sf::RectangleShape playerHealthBar;
-    sf::RectangleShape botHealthBar;
-    bool gameEnded;
 };

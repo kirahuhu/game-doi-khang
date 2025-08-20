@@ -1,34 +1,12 @@
-#ifndef HARDMODE_H
-#define HARDMODE_H
-
-#include <SFML/Graphics.hpp>
-#include <SFML/Audio.hpp>
+#pragma once
+#include "BaseGameMode.h"
 #include "Player.h"
+#include <SFML/Graphics.hpp>
 
-class HardMode {
+class HardMode : public BaseGameMode {
 public:
     HardMode(sf::RenderWindow& window);
-    void runGameWithBot_Hard();
-    sf::Vector2f getOverlap(const sf::FloatRect& rect1, const sf::FloatRect& rect2);
-
-private:
-    sf::RenderWindow& window;
-    Player player;
-    Player bot;
-    sf::RectangleShape background;
-    sf::Texture backgroundTexture;
-    sf::RectangleShape playerHealthBar;
-    sf::RectangleShape botHealthBar;
-    sf::Font font;
-    sf::Text vsText;
-    sf::Text gameOverText;
-    bool gameEnded;
-    sf::Clock clock;
-    sf::Text exitText;
-    sf::Music bgMusic;
-
-
-    void aiControlBot(float deltaTime);
+	void aiControlBot(float dt) override;
+    void update(float dt) override;   // override abstract
+    void render() override;           // override abstract
 };
-
-#endif

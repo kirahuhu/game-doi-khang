@@ -1,5 +1,12 @@
 #pragma once
-#include <SFML/Graphics.hpp>
-#include <SFML/Audio.hpp>
+#include "BaseGameMode.h"
 
-void runGamePVP(sf::RenderWindow& window);
+class PVPMode : public BaseGameMode {
+public:
+    PVPMode(sf::RenderWindow& win);
+
+    void aiControlBot(float dt) override; // PVP không cần AI
+    void runGame() override;               // Override để xử lý input 2 player
+    void render() override;
+    void update(float dt) override;
+};

@@ -1,26 +1,18 @@
+// DifficultyMenu.cpp
 #include "DifficultyMenu.h"
 #include <iostream>
 
 DifficultyMenu::DifficultyMenu(float width, float height) {
-    if (!font.loadFromFile("assets/fonts/arial.ttf")) {
-        std::cerr << "Không thể tải font cho Difficulty Menu!\n";
-    }
+    if (!font.loadFromFile("assets/fonts/arial.ttf"))
+        std::cerr << "Không thể tải font!\n";
 
-    if (!backgroundTexture.loadFromFile("assets/images/difficultymenu_background.jpg")) {
-    std::cerr << "Không thể tải ảnh nền màn chọn độ khó!\n";
-}
-backgroundSprite.setTexture(backgroundTexture);
+    if (!backgroundTexture.loadFromFile("assets/images/difficultymenu_background.jpg"))
+        std::cerr << "Không thể tải ảnh nền!\n";
+    backgroundSprite.setTexture(backgroundTexture);
+    sf::Vector2u bgSize = backgroundTexture.getSize();
+    backgroundSprite.setScale(800.f / bgSize.x, 600.f / bgSize.y);
 
-// Scale vừa cửa sổ (giả sử là 800x600)
-sf::Vector2u bgSize = backgroundTexture.getSize();
-backgroundSprite.setScale(800.f / bgSize.x, 600.f / bgSize.y);
-
-    std::vector<std::string> labels = {
-        "EASY",
-        "MEDIUM",
-        "HARD"
-    };
-
+    std::vector<std::string> labels = { "EASY", "MEDIUM", "HARD" };
     for (int i = 0; i < labels.size(); ++i) {
         sf::Text text;
         text.setFont(font);
@@ -30,14 +22,12 @@ backgroundSprite.setScale(800.f / bgSize.x, 600.f / bgSize.y);
         text.setPosition(width / 2.f - 100, height / 2.f + i * 60 - 50);
         options.push_back(text);
     }
-
     selectedIndex = 0;
 }
 
 void DifficultyMenu::draw(sf::RenderWindow& window) {
     window.draw(backgroundSprite);
-    for (auto& text : options)
-        window.draw(text);
+    for (auto& text : options) window.draw(text);
 }
 
 void DifficultyMenu::moveUp() {
@@ -56,9 +46,7 @@ void DifficultyMenu::moveDown() {
     }
 }
 
-int DifficultyMenu::getSelectedIndex() const {
-    return selectedIndex;
-}
+int DifficultyMenu::getSelectedIndex() const { return selectedIndex; }
 
 BotDifficulty DifficultyMenu::getDifficulty() const {
     switch (selectedIndex) {
@@ -69,20 +57,28 @@ BotDifficulty DifficultyMenu::getDifficulty() const {
     }
 }
 
+// Trong DifficultyMenu.cpp, thêm case cho PVP
 void DifficultyMenu::handleSelection(sf::RenderWindow& window) {
-    window.close();
     switch (selectedIndex) {
-        case 1: // MEDIUM
-            {
-                MediumMode game(window);
-                game.runGameWithBot_Medium(); // Khởi chạy chế độ medium
-            }
+        case 0: { // EASY
+            EasyMode game(window);
+            game.runGame();
             break;
-        case 0: // EASY
-            std::cout << "Chế độ Easy chưa được triển khai!\n";
+        }
+        case 1: { // MEDIUM
+            MediumMode game(window);
+            game.runGame();
             break;
-        case 2: // HARD
-            std::cout << "Chế độ Hard chưa được triển khai!\n";
+        }
+        case 2: { // HARD
+            HardMode game(window);
+            game.runGame();
             break;
+        }
+        case 3: { // PVP
+            PVPMode game(window);
+            game.runGame();
+            break;
+        }
     }
 }
