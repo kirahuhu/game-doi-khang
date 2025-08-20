@@ -49,33 +49,6 @@ void Player::handleInput(sf::Keyboard::Key left, sf::Keyboard::Key right, sf::Ke
     }
 }
 
-/*void Player::update(float deltaTime) {
-    velocity.y += 500.f * deltaTime;
-    sprite.move(velocity * deltaTime);
-
-    float groundY = 600.f;
-    float spriteHeight = sprite.getGlobalBounds().height;
-
-    if (sprite.getPosition().y + spriteHeight > groundY && velocity.y > 0) {
-        sf::Vector2f pos = sprite.getPosition();
-        pos.y = groundY - spriteHeight;
-        sprite.setPosition(pos);
-        velocity.y = 0.f;
-        isOnGround = true;
-    } else {
-        isOnGround = false;
-    }
-
-    if (isHit && hitClock.getElapsedTime().asSeconds() > 0.2f) {
-        isHit = false;
-        sprite.setColor(sf::Color::White);
-    }
-
-    if (isAttacking && actionClock.getElapsedTime().asSeconds() > 0.2f) {
-        setAction(ActionType::Idle);
-    }
-}*/
-
 void Player::update(float deltaTime) {
     // Áp dụng trọng lực
     velocity.y += 500.f * deltaTime;
@@ -244,4 +217,8 @@ void Player::jump() {
         isOnGround = false;
         setAction(ActionType::Jump);  // Thiết lập hành động là nhảy
     }
+}
+
+void Player::setImagePrefix(const std::string& prefix) {
+    imagePrefix = prefix;
 }

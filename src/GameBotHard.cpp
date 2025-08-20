@@ -4,7 +4,9 @@
 
 HardMode::HardMode(sf::RenderWindow& win)
     : BaseGameMode(win, "assets/images/hardbot.png", "assets/images/hardbg.jpg", "assets/sounds/hardmode.ogg")
-{}
+{
+    bot.setImagePrefix("hardbot"); // Thêm hàm setImagePrefix để đổi prefix
+}
 
 void HardMode::aiControlBot(float dt) {
     sf::Vector2f dir = player.getPosition() - bot.getPosition();

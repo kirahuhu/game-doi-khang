@@ -7,7 +7,9 @@ EasyMode::EasyMode(sf::RenderWindow& win)
                    "assets/images/easybot.png",  // Bot texture
                    "assets/images/easybg.jpg",   // Background image
                    "assets/sounds/easymode.ogg") // Music file
-{}
+{
+    bot.setImagePrefix("easybot"); // Thêm hàm setImagePrefix để đổi prefix
+}
 
 void EasyMode::aiControlBot(float deltaTime) {
     sf::FloatRect playerBounds = player.getBounds();

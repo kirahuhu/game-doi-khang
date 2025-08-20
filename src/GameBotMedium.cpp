@@ -4,7 +4,9 @@
 
 MediumMode::MediumMode(sf::RenderWindow& win)
     : BaseGameMode(win, "assets/images/mediumbot2.png", "assets/images/mediumbg.jpg", "assets/sounds/mediumMode.ogg")
-{}
+{
+    bot.setImagePrefix("mediumbot2"); // Thêm hàm setImagePrefix để đổi prefix
+}
 
 void MediumMode::update(float dt) {
     player.update(dt);
@@ -23,14 +25,6 @@ void MediumMode::aiControlBot(float dt) {
     sf::FloatRect botBounds = bot.getBounds();
     float distanceX = playerBounds.left - botBounds.left;
     bool botOnGround = bot.getVelocity().y == 0 && bot.getSprite().getPosition().y + bot.getSprite().getGlobalBounds().height >= 600;
-
-    // Kiểm tra va chạm để set trạng thái bị đánh
-    if ((player.getCurrentAction() == Player::ActionType::Punch || player.getCurrentAction() == Player::ActionType::Kick) && 
-        playerBounds.intersects(botBounds)) {
-        bot.setAction(Player::ActionType::Hitten);  // Set bot bị đánh khi player tấn công
-        bot.getDamageCooldown().restart(); // Reset timer khi bị đánh
-        return;  // Thoát để ưu tiên trạng thái bị đánh
-    }
 
     // Nếu khoảng cách lớn, ưu tiên di chuyển đến gần player
     if (abs(distanceX) > 150) {

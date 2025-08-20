@@ -58,6 +58,7 @@ public:
 	sf::Vector2f getPosition() const;
 	void attack();  // Phương thức tấn công
     void jump();    // Phương thức nhảy
+    void setImagePrefix(const std::string& prefix);
 };
 
 #endif
