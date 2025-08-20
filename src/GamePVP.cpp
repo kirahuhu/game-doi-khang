@@ -1,16 +1,20 @@
 #include "GamePVP.h"
+#include "GameMode.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <iostream>
 
+
 PVPMode::PVPMode(sf::RenderWindow& win)
     : BaseGameMode(win,
-                   "", // Không cần bot texture
+                   "assets/images/player_2.png", // Không cần bot texture
                    "assets/images/background.jpg",
                    "assets/sounds/pvp.ogg") 
 {
     // Thay bot bằng player2
     bot = Player("assets/images/player_2.png", "player_2", sf::Vector2f(500.f, 400.f));
+
+
 }
 
 void PVPMode::aiControlBot(float dt) {
@@ -81,7 +85,9 @@ void PVPMode::runGame() {
         bot.render(window);
         window.draw(playerHealthBar);
         window.draw(botHealthBar);
+        window.draw(vsText);
         window.draw(exitText);
+
         if (gameEnded) window.draw(gameOverText);
         window.display();
     }
