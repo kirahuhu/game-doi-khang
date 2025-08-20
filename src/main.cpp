@@ -46,6 +46,7 @@ int main() {
                                             diffMenu.moveUp();
                                         else if (diffEvent.key.code == sf::Keyboard::Down)
                                             diffMenu.moveDown();
+                                        
                                         else if (diffEvent.key.code == sf::Keyboard::Enter) {
                                             choosing = false;
                                             // Chạy mode tương ứng
@@ -67,6 +68,9 @@ int main() {
                                                 }
                                             }
                                         }
+                                        else if (diffEvent.key.code == sf::Keyboard::O) {
+                                             // 👉 Quay về menu chính 
+                                            choosing = false; }
                                     }
                                 }
                                 window.clear();

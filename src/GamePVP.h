@@ -2,6 +2,9 @@
 #include "BaseGameMode.h"
 
 class PVPMode : public BaseGameMode {
+private:
+    Player& player1 = player;  // alias cho player
+    Player& player2 = bot;     // alias cho bot nhưng gọi là player2
 public:
     PVPMode(sf::RenderWindow& win);
 

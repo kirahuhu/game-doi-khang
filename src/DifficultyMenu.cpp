@@ -1,4 +1,3 @@
-// DifficultyMenu.cpp
 #include "DifficultyMenu.h"
 #include <iostream>
 
@@ -12,6 +11,7 @@ DifficultyMenu::DifficultyMenu(float width, float height) {
     sf::Vector2u bgSize = backgroundTexture.getSize();
     backgroundSprite.setScale(800.f / bgSize.x, 600.f / bgSize.y);
 
+    // ✅ Chỉ còn EASY, MEDIUM, HARD
     std::vector<std::string> labels = { "EASY", "MEDIUM", "HARD" };
     for (int i = 0; i < labels.size(); ++i) {
         sf::Text text;
@@ -23,11 +23,19 @@ DifficultyMenu::DifficultyMenu(float width, float height) {
         options.push_back(text);
     }
     selectedIndex = 0;
+
+    // setup exitText
+    exitText.setFont(font);
+    exitText.setString("Exit: O");
+    exitText.setCharacterSize(20);
+    exitText.setFillColor(sf::Color::White);
+    exitText.setPosition(10.f, height - 30.f);  // góc trái dưới
 }
 
 void DifficultyMenu::draw(sf::RenderWindow& window) {
     window.draw(backgroundSprite);
     for (auto& text : options) window.draw(text);
+    window.draw(exitText);
 }
 
 void DifficultyMenu::moveUp() {
@@ -57,7 +65,6 @@ BotDifficulty DifficultyMenu::getDifficulty() const {
     }
 }
 
-// Trong DifficultyMenu.cpp, thêm case cho PVP
 void DifficultyMenu::handleSelection(sf::RenderWindow& window) {
     switch (selectedIndex) {
         case 0: { // EASY
@@ -72,11 +79,6 @@ void DifficultyMenu::handleSelection(sf::RenderWindow& window) {
         }
         case 2: { // HARD
             HardMode game(window);
-            game.runGame();
-            break;
-        }
-        case 3: { // PVP
-            PVPMode game(window);
             game.runGame();
             break;
         }

@@ -46,6 +46,12 @@ BaseGameMode::BaseGameMode(sf::RenderWindow& win,
     gameOverText.setFillColor(sf::Color::White);
     gameOverText.setPosition(250, 300);
 
+    exitText.setFont(font);
+    exitText.setString("EXIT: O");
+    exitText.setCharacterSize(20);
+    exitText.setFillColor(sf::Color::White);
+    exitText.setPosition(10.f, 570.f);
+
     playerHealthBar.setSize(sf::Vector2f(200, 20));
     playerHealthBar.setFillColor(sf::Color::Red);
     playerHealthBar.setPosition(50, 50);
@@ -96,11 +102,7 @@ void BaseGameMode::runGame() {
             else if (bot.isDead()) { gameOverText.setString("Player Wins"); gameEnded = true; }
         }
 
-        exitText.setFont(font);
-        exitText.setString("EXIT: O");
-        exitText.setCharacterSize(20);
-        exitText.setFillColor(sf::Color::White);
-        exitText.setPosition(10, 570);
+        
 
         window.clear();
         window.draw(background);

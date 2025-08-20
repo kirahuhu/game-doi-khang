@@ -1,16 +1,19 @@
 #include "GamePVP.h"
+#include "GameMode.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <iostream>
 
 PVPMode::PVPMode(sf::RenderWindow& win)
     : BaseGameMode(win,
-                   "", // Không cần bot texture
+                   "assets/images/player_2.png",
                    "assets/images/background.jpg",
-                   "assets/sounds/pvp.ogg") 
+                   "assets/sounds/pvp.ogg"),
+      player1(player),   // alias cho player từ BaseGameMode
+      player2(bot)       // alias cho bot nhưng gọi là player2
 {
-    // Thay bot bằng player2
-    bot = Player("assets/images/player_2.png", "player_2", sf::Vector2f(500.f, 400.f));
+    // Khởi tạo player2 (thay vì bot)
+    player2 = Player("assets/images/player_2.png", "player_2", sf::Vector2f(500.f, 400.f));
 }
 
 void PVPMode::aiControlBot(float dt) {
@@ -27,29 +30,30 @@ void PVPMode::runGame() {
             if (event.type == sf::Event::Closed)
                 window.close();
             if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::O)
-                return; // thoát về menu
+                return; // Thoát về menu
         }
 
         if (!gameEnded) {
             // Player1
-            player.handleInput(sf::Keyboard::A, sf::Keyboard::D,
-                               sf::Keyboard::W, sf::Keyboard::Q,
-                               sf::Keyboard::E, true);
+            player1.handleInput(sf::Keyboard::A, sf::Keyboard::D,
+                                sf::Keyboard::W, sf::Keyboard::Q,
+                                sf::Keyboard::E, true);
+
             // Player2
-            bot.handleInput(sf::Keyboard::Left, sf::Keyboard::Right,
-                            sf::Keyboard::Up, sf::Keyboard::RControl,
-                            sf::Keyboard::RShift, false);
+            player2.handleInput(sf::Keyboard::Left, sf::Keyboard::Right,
+                                sf::Keyboard::Up, sf::Keyboard::RControl,
+                                sf::Keyboard::RShift, false);
 
-            player.update(deltaTime);
-            bot.update(deltaTime);
+            player1.update(deltaTime);
+            player2.update(deltaTime);
 
-            bool isColliding = player.getBounds().intersects(bot.getBounds());
+            bool isColliding = player1.getBounds().intersects(player2.getBounds());
 
             // Player1 attacks
             if (isColliding && (sf::Keyboard::isKeyPressed(sf::Keyboard::Q) || sf::Keyboard::isKeyPressed(sf::Keyboard::E))) {
                 if (attackClock1.getElapsedTime().asSeconds() > 0.5f) {
-                    bot.takeDamage(10);
-                    bot.setHit();
+                    player2.takeDamage(10);
+                    player2.setHit();
                     attackClock1.restart();
                 }
             }
@@ -57,19 +61,19 @@ void PVPMode::runGame() {
             // Player2 attacks
             if (isColliding && (sf::Keyboard::isKeyPressed(sf::Keyboard::RControl) || sf::Keyboard::isKeyPressed(sf::Keyboard::RShift))) {
                 if (attackClock2.getElapsedTime().asSeconds() > 0.5f) {
-                    player.takeDamage(10);
-                    player.setHit();
+                    player1.takeDamage(10);
+                    player1.setHit();
                     attackClock2.restart();
                 }
             }
 
-            playerHealthBar.setSize(sf::Vector2f(player.getHealth(), 20));
-            botHealthBar.setSize(sf::Vector2f(bot.getHealth(), 20));
+            playerHealthBar.setSize(sf::Vector2f(player1.getHealth(), 20));
+            botHealthBar.setSize(sf::Vector2f(player2.getHealth(), 20));
 
-            if (player.isDead()) {
+            if (player1.isDead()) {
                 gameOverText.setString("Player 2 Wins");
                 gameEnded = true;
-            } else if (bot.isDead()) {
+            } else if (player2.isDead()) {
                 gameOverText.setString("Player 1 Wins");
                 gameEnded = true;
             }
@@ -77,64 +81,60 @@ void PVPMode::runGame() {
 
         window.clear();
         window.draw(background);
-        player.render(window);
-        bot.render(window);
+        player1.render(window);
+        player2.render(window);
         window.draw(playerHealthBar);
         window.draw(botHealthBar);
+        window.draw(vsText);
         window.draw(exitText);
+
         if (gameEnded) window.draw(gameOverText);
         window.display();
     }
 }
 
 void PVPMode::update(float dt) {
-    // Cập nhật các đối tượng (player và bot)
-    player.update(dt); // Cập nhật player 1
-    bot.update(dt);    // Cập nhật player 2
+    player1.update(dt);
+    player2.update(dt);
 
-    bool isColliding = player.getBounds().intersects(bot.getBounds());
+    bool isColliding = player1.getBounds().intersects(player2.getBounds());
 
-    if (isColliding && player.isCurrentlyAttacking() && player.getAttackClock().getElapsedTime().asSeconds() > 0.3f) {
-        bot.takeDamage(10); // Giảm máu bot nếu player tấn công
-        bot.setHit();       // Đánh dấu bot bị trúng đòn
-        player.getAttackClock().restart(); // Khởi động lại cooldown của player
+    if (isColliding && player1.isCurrentlyAttacking() && player1.getAttackClock().getElapsedTime().asSeconds() > 0.3f) {
+        player2.takeDamage(10);
+        player2.setHit();
+        player1.getAttackClock().restart();
     }
 
-    if (isColliding && bot.isCurrentlyAttacking() && bot.getAttackClock().getElapsedTime().asSeconds() > 0.3f) {
-        player.takeDamage(10); // Giảm máu player nếu bot tấn công
-        player.setHit();       // Đánh dấu player bị trúng đòn
-        bot.getAttackClock().restart(); // Khởi động lại cooldown của bot
+    if (isColliding && player2.isCurrentlyAttacking() && player2.getAttackClock().getElapsedTime().asSeconds() > 0.3f) {
+        player1.takeDamage(10);
+        player1.setHit();
+        player2.getAttackClock().restart();
     }
 
-    // Cập nhật thanh máu của player và bot
-    playerHealthBar.setSize(sf::Vector2f(player.getHealth(), 20));
-    botHealthBar.setSize(sf::Vector2f(bot.getHealth(), 20));
+    playerHealthBar.setSize(sf::Vector2f(player1.getHealth(), 20));
+    botHealthBar.setSize(sf::Vector2f(player2.getHealth(), 20));
 
-    // Kiểm tra nếu một trong các player chết
-    if (player.isDead()) {
+    if (player1.isDead()) {
         gameOverText.setString("Player 2 Wins");
         gameEnded = true;
-    } else if (bot.isDead()) {
+    } else if (player2.isDead()) {
         gameOverText.setString("Player 1 Wins");
         gameEnded = true;
     }
 }
 
 void PVPMode::render() {
-    window.clear(); // Xóa màn hình
+    window.clear();
 
-    // Vẽ các đối tượng lên cửa sổ
-    window.draw(background); // Vẽ nền
-    player.render(window);   // Vẽ player 1
-    bot.render(window);      // Vẽ player 2
-    window.draw(playerHealthBar); // Vẽ thanh máu player 1
-    window.draw(botHealthBar);    // Vẽ thanh máu player 2
+    window.draw(background);
+    player1.render(window);
+    player2.render(window);
+    window.draw(playerHealthBar);
+    window.draw(botHealthBar);
 
-    // Vẽ các thông báo
-    window.draw(vsText);       // Vẽ chữ "VS"
-    window.draw(exitText);     // Vẽ thông báo thoát game
-    if (gameEnded) window.draw(gameOverText); // Vẽ thông báo kết thúc game
+    window.draw(vsText);
+    window.draw(exitText);
+    if (gameEnded) window.draw(gameOverText);
 
-    window.display(); // Cập nhật cửa sổ
+    window.display();
 }
-

@@ -27,4 +27,5 @@ private:
 
     sf::Texture backgroundTexture;
     sf::Sprite backgroundSprite;
+    sf::Text exitText;
 };
